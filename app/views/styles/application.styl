@@ -1,0 +1,65 @@
+// nib is a powerful lib for stylus that provides cross-browser css3 mixins.
+// No more vendor prefixes. http://visionmedia.github.com/nib/
+@import 'nib'
+
+$black = #000
+$lightblack = #333
+$gray = #999
+$off-gray = #D1D1D1
+$white = #fff
+
+// Apply a natural box layout model to all elements.
+// http://paulirish.com/2012/box-sizing-border-box-ftw/
+*
+  box-sizing: border-box
+  
+body
+  padding-top: 60px;
+  background-color: $off-gray
+
+
+.module
+  margin-bottom: 10px
+  line-height: 16px
+  border: 1px solid rgba(0, 0, 0, .1)
+  border-radius: 6px
+  border-top-left-radius: 13
+  background-color: $white
+  background-clip: padding-box
+
+
+.main-content
+  width: 1170px
+  margin: 0 auto
+  
+  ul.streams 
+  
+    li
+      float: left
+      margin: 0 20px 30px 0
+      width: 270px
+    
+      
+.stream-content
+  border-radius: 3px
+  background: $white
+
+  .screenshot
+    position: relative
+    padding: 10px
+
+    .img
+      max-width: 100%
+
+    .stream-over
+      opacity: 0
+      position: absolute
+      top: 10px
+      left: 10px
+      width: 250px
+      height: 200px
+      background: $white
+      
+
+
+      
