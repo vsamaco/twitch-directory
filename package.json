@@ -28,6 +28,7 @@
 
     "uglify-js-brunch": ">= 1.0 < 1.5",
     "clean-css-brunch": ">= 1.0 < 1.5",
+    "twitch-cors": "https://github.com/vsamaco/twitch-cors/zipball/master",
     "statik": ">= 1.1.0",
     "brunch": ">= 1.0 < 1.5",
     "chai": "1.2.0",
