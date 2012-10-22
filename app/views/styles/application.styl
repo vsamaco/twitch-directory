@@ -42,11 +42,11 @@ body
       
 .stream-content
   border-radius: 3px
-  background: $white
 
   .screenshot
     position: relative
     padding: 10px
+    background-color: $white
 
     .img
       max-width: 100%
@@ -57,9 +57,36 @@ body
       top: 10px
       left: 10px
       width: 250px
-      height: 200px
+      height: 190px
       background: $white
       
+      .status
+        font-weight: bold
+        color: $lightblack
+        line-height: 1.2em
+      
+      .timeago
+        position: absolute
+        bottom: 10px
+        font-weight: bold
+        font-size: 11px
+        
+    .meta
+      margin: 10px 0 5px 0
+      color: $gray
+      font-size: 11px
+      line-height: 1em
+      text-align: right
+      
+  h2.stream-title
+    max-height: 16px
+    margin: 10px 0 0 0
+    padding: 0 0 0 10px
+    font-size: 12px
+    font-weight: normal
+    line-height: 1.4em
+    color: $gray
+    vertical-align: middle
 
 
       
