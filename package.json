@@ -9,8 +9,8 @@
     "url": ""
   },
   "engines": {
-    "node": "0.8.11",
-    "npm" : "1.1.x"
+    "node": "~0.6.10 || 0.8 || 0.9",
+    "npm" : "0.8.x"
   },
   "scripts": {
     "start": "brunch watch --server",
@@ -28,7 +28,6 @@
 
     "uglify-js-brunch": ">= 1.0 < 1.5",
     "clean-css-brunch": ">= 1.0 < 1.5",
-    "twitch-cors": "https://github.com/vsamaco/twitch-cors/tarball/master",
     "statik": ">= 1.1.0",
     "brunch": ">= 1.0 < 1.5",
     "chai": "1.2.0",
