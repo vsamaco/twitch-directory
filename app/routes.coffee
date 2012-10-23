@@ -1,3 +1,3 @@
 module.exports = (match) ->
-  # match '', 'home#index'
   match '', 'streams#index'
+  match 'stream/:name', 'streams#show'
