@@ -1,10 +1,17 @@
 <header class="stream-header">
-  <h2><img src="{{channel.logo}}" class="photo"/> {{channel.display_name}}</h2>
+  <h2>
+    <img src="{{channel.logo}}" class="photo"/> {{channel.display_name}}
+  </h2>
   <em>{{channel.status}}</em>
 </header>
-<div class="module">
-  <img src="{{preview}}" width="80%"/>
-  <p>{{game}}</p>
-  <p>{{viewers}}</p>
+<div class="row-fluid">
+  <div class="module span8">
+    <img src="{{preview}}" width="100%"/>
+    <p>{{game}}</p>
+    <p>{{viewers}}</p>
+  </div>
+  <div class="module span4">
+    <div id="status_container"></div>
+  </div>
 </div>
 
