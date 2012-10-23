@@ -17,5 +17,7 @@
       <span class="viewers">{{viewers}}</span>
     </div>
   </div>
-  <h2 class="stream-title"><a href="#">{{channel.display_name}}</a></h2>
+  <h2 class="stream-title"><a href="/stream/{{channel.name}}">
+    <img src="{{channel.logo}}" class="photo"/> {{channel.display_name}}
+  </a></h2>
 </div>
