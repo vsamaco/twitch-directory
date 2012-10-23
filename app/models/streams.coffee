@@ -4,10 +4,10 @@ Stream = require 'models/stream'
 module.exports = class Streams extends Collection
   model: Stream
   
-  url: "https://api.twitch.tv/kraken/streams?game=League+of+Legends&limit=12"
+  url: "/api/streams/League of Legends"
     
-  fetch: (options) ->
-    super {dataType: "jsonp"}
+  # fetch: (options) ->
+  #   super {dataType: "jsonp"}
   
   parse: (response) ->
     super
