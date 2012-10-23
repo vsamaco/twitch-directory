@@ -4,10 +4,16 @@ module.exports = class Stream extends Model
   url: "/api/stream"
   
   initialize: (options) ->
-    @url = "#{@url}/#{options.name}"
-    console.log "url: #{@url}"
+    if options and options.name
+      @url = "#{@url}/#{options.name}"
+      console.log "url: #{@url}"
+    else
+      @url = ''
     
   parse: (response) ->
     super
-    console.log response.stream
-    response.stream
+    if (response.stream)
+      console.log response.stream
+      response.stream
+    else
+      response
