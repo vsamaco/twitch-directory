@@ -17,6 +17,8 @@ var config = {
 // TODO: move to redis hash map
 config.summoners['wingsofdeath'] = 'wingsofdeathx';
 config.summoners['dandinh'] = 'mandinh';
+config.summoners['tsm_dyrus'] = 'dyrus';
+config.summoners['aphromoo'] = 'aphromoo';
 
 app.configure(function() {
   app.use(express.bodyParser());
@@ -75,19 +77,21 @@ app.get('/api/stream/:name', function(req, res) {
       };
     
       request(url.format(elophant_options), function(elo_err, elo_response, elo_body) {
-        var elophant_data = JSON.parse(elo_body);
+        if (elo_body) {
+          var elophant_data = JSON.parse(elo_body);
 
-        // Grab relevant player data from champiionselections array
+          // Grab relevant player data from championselections array
 
-        elophant_data['game']['playerChampionSelections'].forEach(function(player) {
-          var playerName = player['summonerInternalName'];
-          if (summonerName == playerName) {
-            console.log(player);
-            elophant_data['player'] = player;
-          }
-        });
+          elophant_data['game']['playerChampionSelections'].forEach(function(player) {
+            var playerName = player['summonerInternalName'];
+            if (summonerName == playerName) {
+              console.log(player);
+              elophant_data['player'] = player;
+            }
+          });
 
-        twitch_data['stream']['elophant'] = elophant_data;
+          twitch_data['stream']['elophant'] = elophant_data;
+        }
         this_res.send(twitch_data);
       });
     } else {
