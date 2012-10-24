@@ -1,3 +1,8 @@
-<ul>
-  <li>Champion: {{elophant.player.championId}}</li>
+<ul class="nav nav-tabs nav-stacked">
+  {{#if elophant.player.championId}}
+    <li>Champion: {{champion elophant.player.championId}} {{elophant.player.championId}}</li>
+  {{/if}}
+  <li>{{channel.status}}</li>
+  <li>{{viewers}} viewers</li>
+  <li>{{game}}</li>
 </ul>
