@@ -3,7 +3,8 @@ var application_root = __dirname,
     http = require('http'),
     url = require('url'),
     request = require('request'),
-    express = require('express');
+    express = require('express'),
+    mongoose = require('mongoose');
 
 var app = express();
 
@@ -12,6 +13,34 @@ var config = {
   "port": (process.env.PORT || 1337),
   "summoners": {}
 };
+
+var db = mongoose.createConnection('mongodb://admin:7oHGxjkODEt3@ds041337.mongolab.com:41337/directorydb');
+db.on('error', console.error.bind(console, 'connection error'));
+db.once('open', function() {
+  console.log('open db');
+});
+
+var Schema = mongoose.Schema;
+
+var Thing = new Schema({
+  name: String
+});
+
+var Stream = new Schema({
+  name: String,
+  streamId: String,
+  summonerName: String,
+  status: String,
+  viewers: Number,
+  preview: String,
+  game: String,
+  logo: String,
+  updated_at: String
+});
+
+var StreamModel = db.model('Stream', Stream);
+
+
 
 // Internal mapping stream to summonername
 // TODO: move to redis hash map
@@ -37,7 +66,7 @@ app.get('/api', function(req, res) {
   res.send('Twitch API is running');
 });
 
-app.get('/api/streams/:game', function(req, res) {
+app.get('/api/streams2/:game', function(req, res) {
   var options = {
     protocol: 'https:',
     host: 'api.twitch.tv/kraken',
@@ -49,6 +78,16 @@ app.get('/api/streams/:game', function(req, res) {
   console.log('RETREIVING: ' + query);
   
   request(query).pipe(res);
+});
+
+app.get('/api/streams/:game', function(req, res) {
+  return StreamModel.find(function(err, streams) {
+    if(!err) {
+      return res.send(streams);
+    } else {
+      return console.log(err);
+    }
+  })
 });
 
 app.get('/api/stream/:name', function(req, res) {
@@ -114,6 +153,70 @@ app.get('/api/game/:name', function(req, res) {
   console.log('RETREIVING: ' + query);
   
   request(query).pipe(res);
+});
+
+app.post('/api/streams', function(req, res) {
+  var stream;
+  console.log(req.body);
+  stream = new StreamModel({
+    title: req.body.title,
+    streamId: req.body.streamId,
+    summonerName: req.body.summonerName
+  });
+
+  StreamModel.update( {streamId: stream.streamId}, stream, {upsert: true}, function(err, data) {
+    if(!err) {
+      return console.log(data);
+    } else {
+      return console.log(err);
+    }
+  });
+  
+  
+  return res.send(stream);
+});
+
+app.get('/cron/update-streams', function(req, res) {
+  var game = "League of Legends";
+
+  var options = {
+    protocol: 'https:',
+    host: 'api.twitch.tv/kraken',
+    pathname: '/streams',
+    query: {game: game, limit: 12}
+    
+  };
+  
+  var query = url.format(options).replace(/%20/g, '+');
+  console.log('RETREIVING: ' + query);
+  
+  // Get Twitch Stream data
+  request(query, function(err, response, body) {
+    var twitchJSON = JSON.parse(body);
+
+    twitchJSON.streams.forEach(function(twitchStream) {
+      
+      var stream = {
+        name: twitchStream.channel.display_name,
+        streamId: twitchStream.channel.name,
+        status: twitchStream.channel.status,
+        viewers: twitchStream.viewers,
+        preview: twitchStream.preview,
+        game: twitchStream.game,
+        logo: twitchStream.channel.logo,
+        updated_at: twitchStream.channel.updated_at
+      };
+    
+      StreamModel.update( {streamId: stream.streamId}, stream, {upsert: true}, function(err, data) {
+        if(!err) {
+          return console.log("created:" + stream.name);
+        } else {
+          return console.log(err);
+        }
+      });
+    });
+    res.end("Updated Streams");
+  });
 });
 
 app.listen(config.port);
