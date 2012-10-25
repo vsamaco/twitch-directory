@@ -11,13 +11,14 @@ var app = express();
 var config = {
   "elophant_key": "V45wByoYCe2ESQ7h3tnC",
   "port": (process.env.PORT || 1337),
+  "database": (process.env.MONGOLAB_URI || 'localhost/directorydb'),
   "summoners": {}
 };
 
-var db = mongoose.createConnection('mongodb://admin:7oHGxjkODEt3@ds041337.mongolab.com:41337/directorydb');
+var db = mongoose.createConnection(config.database);
 db.on('error', console.error.bind(console, 'connection error'));
 db.once('open', function() {
-  console.log('open db');
+  console.log('open db: ' + config.database);
 });
 
 var Schema = mongoose.Schema;
