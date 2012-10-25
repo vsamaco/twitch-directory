@@ -11,5 +11,5 @@ module.exports = class Streams extends Collection
   
   parse: (response) ->
     super
-    console.log(response);
-    response.streams
+    # console.log(response);
+    # response.streams

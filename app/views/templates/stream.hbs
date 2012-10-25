@@ -3,21 +3,21 @@
 
   </header>
   <div class="screenshot">
-    <a href="/stream/{{channel.name}}" class="stream-link">
+    <a href="/stream/{{name}}" class="stream-link">
       <img src="{{preview}}"/>
     </a>
-    <a href="/stream/{{channel.name}}" class="stream-over">
+    <a href="/stream/{{name}}" class="stream-over">
       <div class="status">
-        <strong>{{channel.status}}</strong>
+        <strong>{{status}}</strong>
       </div>
-      <em class="timeago">{{channel.updated_at}}</em>
+      <em class="timeago">{{updated_at}}</em>
     </a>
     <div class="meta">
       <span class="game">{{game}}</span>
       <span class="viewers">{{viewers}}</span>
     </div>
   </div>
-  <h2 class="stream-title"><a href="/stream/{{channel.name}}">
-    <img src="{{channel.logo}}" class="photo"/> {{channel.display_name}}
+  <h2 class="stream-title"><a href="/stream/{{streamId}}">
+    <img src="{{logo}}" class="photo"/> {{name}}
   </a></h2>
 </div>
