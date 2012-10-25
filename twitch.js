@@ -92,6 +92,16 @@ app.get('/api/streams/:game', function(req, res) {
 });
 
 app.get('/api/stream/:name', function(req, res) {
+  return StreamModel.findOne({streamId: req.params.name}, function(err, stream) {
+    if(!err) {
+      return res.send(stream);
+    } else {
+      return console.log(err);
+    }
+  });
+});
+
+app.get('/api/stream2/:name', function(req, res) {
   var options = {
     protocol: 'https:',
     host: 'api.twitch.tv/kraken',
