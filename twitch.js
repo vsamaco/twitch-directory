@@ -202,17 +202,17 @@ app.get('/cron/update-streams', function(req, res) {
   var query = url.format(options).replace(/%20/g, '+');
   console.log('RETREIVING: ' + query);
   
+  StreamModel.update({}, {live: false}, {multi: true}, function(err, data) {
+    if(!err) {
+      return console.log("all streams offline");
+    } else {
+      return console.log(err);
+    }
+  });
+  
   // Get Twitch Stream data
   request(query, function(err, response, body) {
     var twitchJSON = JSON.parse(body);
-    
-    StreamModel.update({}, {live: false}, {upsert: false}, function(err, data) {
-      if(!err) {
-        return console.log("all streams offline");
-      } else {
-        return console.log(err);
-      }
-    });
 
     twitchJSON.streams.forEach(function(twitchStream) {
       
