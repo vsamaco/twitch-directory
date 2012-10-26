@@ -16,4 +16,6 @@ module.exports = class Stream extends Model
       console.log response.stream
       response.stream
     else
+      if (@url)
+        console.log response
       response
