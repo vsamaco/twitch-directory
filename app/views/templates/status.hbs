@@ -2,6 +2,9 @@
   {{#if elophant.player.championId}}
     <li>Champion: {{champion elophant.player.championId}} {{elophant.player.championId}}</li>
   {{/if}}
+  {{#if lolGames}}
+    {{lol_games summonerName}}
+  {{/if}}
   <li>{{status}}</li>
   <li>{{viewers}} viewers</li>
   <li>{{game}}</li>
