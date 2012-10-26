@@ -36,7 +36,8 @@ var Stream = new Schema({
   preview: String,
   game: String,
   logo: String,
-  updated_at: String
+  updated_at: String,
+  live: Boolean
 });
 
 var StreamModel = db.model('Stream', Stream);
@@ -82,7 +83,7 @@ app.get('/api/streams2/:game', function(req, res) {
 });
 
 app.get('/api/streams/:game', function(req, res) {
-  return StreamModel.find(function(err, streams) {
+  return StreamModel.find({live: true}, function(err, streams) {
     if(!err) {
       return res.send(streams);
     } else {
@@ -204,6 +205,14 @@ app.get('/cron/update-streams', function(req, res) {
   // Get Twitch Stream data
   request(query, function(err, response, body) {
     var twitchJSON = JSON.parse(body);
+    
+    StreamModel.update({}, {live: false}, {upsert: false}, function(err, data) {
+      if(!err) {
+        return console.log("all streams offline");
+      } else {
+        return console.log(err);
+      }
+    });
 
     twitchJSON.streams.forEach(function(twitchStream) {
       
@@ -215,7 +224,8 @@ app.get('/cron/update-streams', function(req, res) {
         preview: twitchStream.preview,
         game: twitchStream.game,
         logo: twitchStream.channel.logo,
-        updated_at: twitchStream.channel.updated_at
+        updated_at: twitchStream.channel.updated_at,
+        live: true
       };
     
       StreamModel.update( {streamId: stream.streamId}, stream, {upsert: true}, function(err, data) {
