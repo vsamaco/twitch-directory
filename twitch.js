@@ -206,13 +206,13 @@ app.get('/cron/update-streams', function(req, res) {
   request(query, function(err, response, body) {
     var twitchJSON = JSON.parse(body);
     
-    // StreamModel.update({}, {live: false}, {upsert: false}, function(err, data) {
-    //   if(!err) {
-    //     return console.log("all streams offline");
-    //   } else {
-    //     return console.log(err);
-    //   }
-    // });
+    StreamModel.update({}, {live: false}, {upsert: false}, function(err, data) {
+      if(!err) {
+        return console.log("all streams offline");
+      } else {
+        return console.log(err);
+      }
+    });
 
     twitchJSON.streams.forEach(function(twitchStream) {
       
