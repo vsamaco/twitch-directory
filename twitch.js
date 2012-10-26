@@ -83,13 +83,13 @@ app.get('/api/streams2/:game', function(req, res) {
 });
 
 app.get('/api/streams/:game', function(req, res) {
-  return StreamModel.find({live: true}, function(err, streams) {
+  return StreamModel.find({live: true}, null, {limit: 12, sort: {viewers: -1}}, function(err, streams) {
     if(!err) {
       return res.send(streams);
     } else {
       return console.log(err);
     }
-  })
+  });
 });
 
 app.get('/api/stream/:name', function(req, res) {
