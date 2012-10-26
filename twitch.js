@@ -27,19 +27,48 @@ var Thing = new Schema({
   name: String
 });
 
+var Champion = new Schema({
+  summonerInternalName: String,
+  spell1Id: Number,
+  spell2Id: Number,
+  selectedSkinIndex: Number,
+  championId: Number
+});
+
+var TeamPlayer = new Schema({
+  accountId: Number,
+  summonerInternalName: String,
+  summonerId: Number,
+  pickTurn: Number
+});
+
+var LoLGame = new Schema({
+  id: String,
+  type: String,
+  state: String,
+  mapId: String,
+  champions: [Champion],
+  teamOne: [TeamPlayer],
+  teamTwo: [TeamPlayer]
+});
+
 var Stream = new Schema({
   name: String,
   streamId: String,
   summonerName: String,
-  status: String,
+  state: String,
   viewers: Number,
   preview: String,
   game: String,
   logo: String,
   updated_at: String,
-  live: Boolean
+  live: Boolean,
+  lolGames: [LoLGame]
 });
 
+var TeamPlayerModel = db.model('TeamPlayer', TeamPlayer);
+var ChampionModel = db.model('Champion', Champion);
+var LoLGameModel = db.model('LoLGame', LoLGame);
 var StreamModel = db.model('Stream', Stream);
 
 
@@ -163,8 +192,87 @@ app.get('/api/game/:name', function(req, res) {
   
   var query = url.format(options);
   console.log('RETREIVING: ' + query);
-  
-  request(query).pipe(res);
+    
+  request(query, function(err, response, body) {
+    var game = JSON.parse(body);
+    
+    // Build Champion Array
+    var champions = [];
+    game.game.playerChampionSelections.forEach(function(gameChampion) {
+      var champion = new ChampionModel({
+        summonerInternalName: gameChampion.summonerInternalName,
+        spell1Id: gameChampion.spell1Id,
+        spell2Id: gameChampion.spell2Id,
+        selectedSkinIndex: gameChampion.selectedSkinIndex,
+        championId: gameChampion.championId
+      });
+      
+      champions.push(champion);
+    });
+    
+    // Build TeamOne Array
+    var teamOne = [];
+    game.game.teamOne.forEach(function(player) {
+      var teamPlayer = new TeamPlayerModel({
+        accountId: player.accountId,
+        summonerInternalName: player.summonerInternalName,
+        summonerId: player.summonerId,
+        pickTurn: player.pickTurn
+      });
+      
+      teamOne.push(teamPlayer);
+    });
+    
+    // Build TeamTwo Array
+    var teamTwo = [];
+    game.game.teamTwo.forEach(function(player) {
+      var teamPlayer = new TeamPlayerModel({
+        accountId: player.accountId,
+        summonerInternalName: player.summonerInternalName,
+        summonerId: player.summonerId,
+        pickTurn: player.pickTurn
+      });
+      
+      teamTwo.push(teamPlayer);
+    });
+    
+    var lolGame = new LoLGameModel({
+      id: game.game.id,
+      type: game.game.gameType,
+      state: game.game.gameState,
+      mapId: game.game.mapId,
+      champions: champions,
+      teamOne: teamOne,
+      teamTwo: teamTwo
+    });
+
+    // console.log(lolGame);
+    
+    StreamModel.findOne({summonerName: req.params.name}, function(err, stream) {
+      console.log("LOADED: " + stream.name);
+      var found = false;
+      stream.lolGames.forEach(function(game) {
+        if(game.id == lolGame.id) {
+          game = lolGame;
+          console.log("UPDATING EXISTING GAME");
+          found = true;
+        }
+      });
+      if (!found) {
+        stream.lolGames.push(lolGame);
+        console.log("ADDING NEW GAME");
+      }
+      console.log(stream);
+      stream.save(function(err) {
+        if(!err) {
+          return console.log("Stream Updated");
+        } else {
+          return console.log(err);
+        }
+      });
+    });
+    res.send(game);
+  });
 });
 
 app.post('/api/streams', function(req, res) {
