@@ -9,11 +9,16 @@ module.exports = class StreamView extends View
     "hover .screenshot" : 'toggleScreenshot'
   }
   
-  toggleScreenshot: (e) =>    
+  initialize: ->
+    super
+    @$("time.timeago").livequery ->
+      $(@).timeago();
+  
+  toggleScreenshot: (e) ->    
     switch e.type
       when 'mouseenter'
-        @.$(".stream-over").stop().fadeTo('fast', 1);
+        @$(".stream-over").stop().fadeTo('fast', 1);
       when 'mouseleave'
-        @.$(".stream-over").stop().fadeTo('fast', 0);
+        @$(".stream-over").stop().fadeTo('fast', 0);
 
     
