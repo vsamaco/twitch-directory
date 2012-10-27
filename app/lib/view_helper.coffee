@@ -153,16 +153,13 @@ champions = {
   
 # Game status
 Handlebars.registerHelper 'lol_games', (context) ->
-  result = ''
+  result = '';
   
   # Iterate list of games
   for game in this.lolGames
-    result += "<li>#{game.type}</li>"
-    result += "<li>#{game.state}</li>" if game.state
-    # Output current summoner champion
-    for champion in game.champions 
-      result += "<li>#{champions[champion.championId]}</li>" if champion.summonerInternalName is this.summonerName
-  
+    gameDate = "<time class=\"timeago\" datetime=\"#{game.created}\">#{game.created}</time>"
+    result += "<li>#{game.type} #{champions[game.championId]} #{gameDate}";
+ 
   return new Handlebars.SafeString result
   
 # Player stats

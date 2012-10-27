@@ -4,10 +4,19 @@
   <li>{{viewers}} viewers</li>
   {{/if}}
   <li>{{game}}</li>
-  {{#if lolGames}}
-    {{lol_games summonerName}}
-  {{/if}}
-  {{#if lolStats}}
-    {{lol_stats summonerName}}
-  {{/if}}
 </ul>
+
+{{#if lolStats}}
+<h3>Stats</h3>
+<ul class="stats">
+  {{lol_stats summonerName}}
+</ul>
+{{/if}}
+
+<h3>Recent Games</h3>
+{{#if lolGames}}
+<ul>
+  {{lol_games summonerName}}
+</ul>
+{{/if}}
+
