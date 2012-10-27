@@ -42,7 +42,7 @@ var TeamPlayer = new Schema({
   pickTurn: Number
 });
 
-var LoLGame = new Schema({
+var LoLActiveGame = new Schema({
   id: String,
   type: String,
   state: String,
@@ -50,6 +50,26 @@ var LoLGame = new Schema({
   champions: [Champion],
   teamOne: [TeamPlayer],
   teamTwo: [TeamPlayer]
+});
+
+var LoLGamePlayer = new Schema({
+  championId: Number,
+  summonerId: Number,
+  summonerName: String,
+  teamId: Number,
+});
+
+var LoLGame = new Schema({
+  id: Number,
+  type: String,
+  queueType: String,
+  mapId: Number,
+  players: [LoLGamePlayer],
+  teamId: Number,
+  championId: Number,
+  spell1: Number,
+  spell2: Number,
+  created: Date
 });
 
 var LoLStat = new Schema({
@@ -79,6 +99,8 @@ var Stream = new Schema({
 
 var TeamPlayerModel = db.model('TeamPlayer', TeamPlayer);
 var ChampionModel = db.model('Champion', Champion);
+var LoLActiveGameModel = db.model('LoLActiveGame', LoLActiveGame);
+var LoLGamePlayerModel = db.model('LoLGamePlayer', LoLGamePlayer);
 var LoLGameModel = db.model('LoLGame', LoLGame);
 var LoLStatModel = db.model('LolStat', LoLStat);
 var StreamModel = db.model('Stream', Stream);
@@ -285,6 +307,78 @@ app.get('/api/game/:name', function(req, res) {
     });
     res.send(game);
   });
+});
+
+app.get('/cron/games/:name', function(req, res) {
+  StreamModel.findOne({summonerName: req.params.name}, function(err, stream) {
+    if(err) {
+      return console.log(err);
+    }
+
+    if(!stream.accountId) {
+      return console.log("No account ID found");
+    }
+    
+    var accountId = stream.accountId;
+
+    var options = {
+      protocol: 'http:',
+      host: 'elophant.com/api/v1/na',
+      pathname: '/getRecentGames',
+      query: {accountId: accountId, key: config.elophant_key}
+    };
+
+    var query = url.format(options);
+    console.log('RETREIVING: ' + query);
+    
+    request(query, function(err, response, body) {
+      var gamesJSON = JSON.parse(body);
+      
+      lolGames = [];
+      gamesJSON.gameStatistics.forEach(function(gameStat) {
+        
+        var lolGamePlayers = [];
+        gameStat.fellowPlayers.forEach(function(player) {
+          var gamePlayer = new LoLGamePlayerModel({
+            championId: player.championId,
+            summonerId: player.summonerId,
+            summonerName: player.summonerName,
+            teamId: player.teamId
+          });
+          
+          lolGamePlayers.push(gamePlayer);
+        });
+        
+        var lolgame = new LoLGameModel({
+          id: gameStat.gameId,
+          type: gameStat.gameType,
+          queueType: gameStat.queueType,
+          mapId: gameStat.gameMapId,
+          players: lolGamePlayers,
+          teamId: gameStat.teamId,
+          championId: gameStat.championId,
+          spell1: gameStat.spell1,
+          spell2: gameStat.spell2,
+          created: gameStat.createDate
+        });
+        
+        lolGames.push(lolgame);
+      });
+      
+      console.log(lolGames);
+      stream.lolGames = lolGames;
+      
+      stream.save(function(err, data) {
+        if(!err) {
+          return console.log("Stream Updated");
+        } else {
+          return console.log(err);
+        }
+      });
+      
+      res.send(gamesJSON);
+    });
+  });  
 });
 
 app.get('/cron/stats/:name', function(req, res) {
