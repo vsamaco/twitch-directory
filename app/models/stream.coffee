@@ -12,7 +12,7 @@ module.exports = class Stream extends Model
     
   parse: (response) ->
     super
-    if (response.stream)
+    if (response && response.stream)
       console.log response.stream
       response.stream
     else

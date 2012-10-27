@@ -156,7 +156,7 @@ app.get('/api/streams/:game', function(req, res) {
 });
 
 app.get('/api/stream/:name', function(req, res) {
-  return StreamModel.findOne({streamId: req.params.name}, function(err, stream) {
+  return StreamModel.findOne({streamId: req.params.name.toLowerCase()}, function(err, stream) {
     if(!err) {
       return res.send(stream);
     } else {
