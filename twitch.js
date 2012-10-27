@@ -52,9 +52,19 @@ var LoLGame = new Schema({
   teamTwo: [TeamPlayer]
 });
 
+var LoLStat = new Schema({
+  summaryType: String,
+  maxRating: Number,
+  rating: Number,
+  wins: Number,
+  losses: Number,
+  updated: Date
+});
+
 var Stream = new Schema({
   name: String,
   streamId: String,
+  accountId: String,
   summonerName: String,
   state: String,
   viewers: Number,
@@ -63,12 +73,14 @@ var Stream = new Schema({
   logo: String,
   updated_at: String,
   live: Boolean,
-  lolGames: [LoLGame]
+  lolGames: [LoLGame],
+  lolStats: [LoLStat]
 });
 
 var TeamPlayerModel = db.model('TeamPlayer', TeamPlayer);
 var ChampionModel = db.model('Champion', Champion);
 var LoLGameModel = db.model('LoLGame', LoLGame);
+var LoLStatModel = db.model('LolStat', LoLStat);
 var StreamModel = db.model('Stream', Stream);
 
 
@@ -272,6 +284,59 @@ app.get('/api/game/:name', function(req, res) {
       });
     });
     res.send(game);
+  });
+});
+
+app.get('/cron/stats/:name', function(req, res) {
+  StreamModel.findOne({summonerName: req.params.name}, function(err, stream) {
+    if(err) {
+      return console.log(err);
+    }
+
+    if(!stream.accountId) {
+      return console.log("No account ID found");
+    }
+    var accountId = stream.accountId;
+
+    var options = {
+      protocol: 'http:',
+      host: 'elophant.com/api/v1/na',
+      pathname: '/getPlayerStats',
+      query: {accountId: accountId, season: "CURRENT", key: config.elophant_key}
+    };
+
+    var query = url.format(options);
+    console.log('RETREIVING: ' + query);
+    
+    request(query, function(err, response, body) {
+      var summaryJSON = JSON.parse(body);
+  
+      var stats = [];
+      summaryJSON.playerStatSummaries.playerStatSummarySet.forEach(function(summarySet) {
+        var stat = new LoLStatModel({
+          summaryType: summarySet.playerStatSummaryType,
+          maxRating: summarySet.maxRating,
+          rating: summarySet.rating,
+          wins: summarySet.wins,
+          losses: summarySet.losses,
+          updated: summarySet.modifyDate
+        });
+        stats.push(stat);
+      });
+  
+      console.log(stats);
+      stream.lolStats = stats;
+      
+      stream.save(function(err, data) {
+        if(!err) {
+          return console.log("Stream Updated");
+        } else {
+          return console.log(err);
+        }
+      });
+    
+      res.send(summaryJSON);
+    });
   });
 });
 
