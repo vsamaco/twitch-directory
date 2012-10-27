@@ -164,6 +164,15 @@ Handlebars.registerHelper 'lol_games', (context) ->
       result += "<li>#{champions[champion.championId]}</li>" if champion.summonerInternalName is this.summonerName
   
   return new Handlebars.SafeString result
+  
+# Player stats
+Handlebars.registerHelper 'lol_stats', (context) ->
+  result = ''
+
+  # Iterate list of stats
+  for stat in this.lolStats
+    result += "<li>#{stat.summaryType} : #{stat.rating} (#{stat.wins}/#{stat.losses})</li>"
+  return new Handlebars.SafeString result  
 
 # Champion lookup
 Handlebars.registerHelper 'champion', (context, options) ->
