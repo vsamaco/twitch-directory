@@ -93,7 +93,7 @@ var Stream = new Schema({
   logo: String,
   updated_at: String,
   live: Boolean,
-  lolGames: [LoLGame],
+  lolGames: [{type: Schema.Types.ObjectId, ref: 'LoLGame'}],
   lolStats: [LoLStat]
 });
 
@@ -314,10 +314,9 @@ app.get('/cron/games/:name', function(req, res) {
     if(err) {
       return console.log(err);
     }
-
-    if(!stream.accountId) {
-      return console.log("No account ID found");
-    }
+    
+    if(!stream) return console.log("Stream not found");
+    if(!stream.accountId) return console.log("No account ID found");
     
     var accountId = stream.accountId;
 
@@ -366,14 +365,18 @@ app.get('/cron/games/:name', function(req, res) {
       });
       
       console.log(lolGames);
-      stream.lolGames = lolGames;
+      // stream.lolGames = lolGames;
       
       stream.save(function(err, data) {
-        if(!err) {
-          return console.log("Stream Updated");
-        } else {
-          return console.log(err);
-        }
+        if(err) console.log(err); 
+        
+        lolGames[0]._creator = stream._id;
+        lolGames[0].update( {id: lolGames[0].id}, lolGames[0], {upsert: true}, function(err, data) {
+          if(err) console.log(err);
+          
+          console.log('lolgame saved');
+        });
+
       });
       
       res.send(gamesJSON);
