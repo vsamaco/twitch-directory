@@ -106,30 +106,11 @@ var LoLGameModel = db.model('LoLGame', LoLGame);
 var LoLStatModel = db.model('LolStat', LoLStat);
 var StreamModel = db.model('Stream', Stream);
 
-// var upsertData = function(model) {
-//   var data = model.toObject();
-//   delete data._id;
-//   return data;
-// };
-
-// var lolgame = new LoLGameModel({
-//   id: 1,
-//   type: 'RANKED4',
-//   queueType: 'SOLO RANKED',
-//   mapId: 1,
-//   teamId: 100,
-//   championId: 5,
-//   spell1: 1,
-//   spell2: 2
-// });
-// 
-// LoLGameModel.update({id: lolgame.id}, upsertData(lolgame), {upsert: true}, function(err, data) {
-// //lolgame.save(function(err,data) {
-//   if(err) console.log(err);
-//   console.log(data);
-//   console.log('saved game');
-// });
-
+var upsertData = function(model) {
+  var data = model.toObject();
+  delete data._id;
+  return data;
+};
 
 
 // Internal mapping stream to summonername
