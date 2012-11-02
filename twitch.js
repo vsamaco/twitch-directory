@@ -60,6 +60,7 @@ var LoLGamePlayer = new Schema({
 });
 
 var LoLGame = new Schema({
+  _creator: {type: Schema.Types.ObjectId, ref: 'Stream'},
   id: Number,
   type: String,
   queueType: String,
@@ -156,13 +157,17 @@ app.get('/api/streams/:game', function(req, res) {
 });
 
 app.get('/api/stream/:name', function(req, res) {
-  return StreamModel.findOne({streamId: req.params.name.toLowerCase()}, function(err, stream) {
-    if(!err) {
-      return res.send(stream);
-    } else {
-      return console.log(err);
-    }
-  });
+  return StreamModel.findOne({streamId: req.params.name.toLowerCase()})
+          .populate('lolGames', null, null, {limit: 5, sort: {created: -1}})
+          .exec(function(err, stream) {
+            if(!err) {
+              console.log('success');
+              return res.send(stream);
+            } else {
+              console.log(err);
+              return res.send('Error');
+            }
+          });
 });
 
 app.get('/api/stream2/:name', function(req, res) {
@@ -364,19 +369,25 @@ app.get('/cron/games/:name', function(req, res) {
         lolGames.push(lolgame);
       });
       
-      console.log(lolGames);
+      // console.log(lolGames);
       // stream.lolGames = lolGames;
       
       stream.save(function(err, data) {
         if(err) console.log(err); 
         
-        lolGames[0]._creator = stream._id;
-        lolGames[0].update( {id: lolGames[0].id}, lolGames[0], {upsert: true}, function(err, data) {
-          if(err) console.log(err);
+        lolGames.forEach(function(lolgame) {
+          lolgame._creator = stream._id;
+          lolgame.save(function(err, data) {
+            if(err) console.log(err);
           
-          console.log('lolgame saved');
+            console.log('lolgame saved');
+            stream.lolGames.push(lolgame);
+            stream.save(function(err, data) {
+              if(!err) console.log('stream lolgames saved');
+            });
+          });
         });
-
+        console.log('stream saved ' + lolGames.length);
       });
       
       res.send(gamesJSON);
