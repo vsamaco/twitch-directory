@@ -106,6 +106,30 @@ var LoLGameModel = db.model('LoLGame', LoLGame);
 var LoLStatModel = db.model('LolStat', LoLStat);
 var StreamModel = db.model('Stream', Stream);
 
+// var upsertData = function(model) {
+//   var data = model.toObject();
+//   delete data._id;
+//   return data;
+// };
+
+// var lolgame = new LoLGameModel({
+//   id: 1,
+//   type: 'RANKED4',
+//   queueType: 'SOLO RANKED',
+//   mapId: 1,
+//   teamId: 100,
+//   championId: 5,
+//   spell1: 1,
+//   spell2: 2
+// });
+// 
+// LoLGameModel.update({id: lolgame.id}, upsertData(lolgame), {upsert: true}, function(err, data) {
+// //lolgame.save(function(err,data) {
+//   if(err) console.log(err);
+//   console.log(data);
+//   console.log('saved game');
+// });
+
 
 
 // Internal mapping stream to summonername
@@ -339,6 +363,7 @@ app.get('/cron/games/:name', function(req, res) {
       var gamesJSON = JSON.parse(body);
       
       lolGames = [];
+      stream.lolgames = (stream.lolgames || []);
       gamesJSON.gameStatistics.forEach(function(gameStat) {
         
         var lolGamePlayers = [];
@@ -354,6 +379,7 @@ app.get('/cron/games/:name', function(req, res) {
         });
         
         var lolgame = new LoLGameModel({
+          _creator: stream._id,
           id: gameStat.gameId,
           type: gameStat.gameType,
           queueType: gameStat.queueType,
@@ -366,28 +392,22 @@ app.get('/cron/games/:name', function(req, res) {
           created: gameStat.createDate
         });
         
-        lolGames.push(lolgame);
-      });
-      
-      // console.log(lolGames);
-      // stream.lolGames = lolGames;
-      
-      stream.save(function(err, data) {
-        if(err) console.log(err); 
-        
-        lolGames.forEach(function(lolgame) {
-          lolgame._creator = stream._id;
-          lolgame.save(function(err, data) {
-            if(err) console.log(err);
-          
-            console.log('lolgame saved');
-            stream.lolGames.push(lolgame);
-            stream.save(function(err, data) {
-              if(!err) console.log('stream lolgames saved');
+        LoLGameModel.findOne({id: lolgame.id}, function(err, game) {
+          if(err) console.log(err);
+          if(!game) { //create new record
+            lolgame.save(function(err, data) {
+              if(err) console.log(err);
+              console.log("game saved:%s",lolgame._id);
+              stream.lolGames.push(lolgame);
+              stream.save(function(err, data) {
+                if(err) return console.log(err, data);
+                console.log("stream saved %s", data);
+              });
             });
-          });
+          } else {
+            console.log("game already exists");
+          }
         });
-        console.log('stream saved ' + lolGames.length);
       });
       
       res.send(gamesJSON);
