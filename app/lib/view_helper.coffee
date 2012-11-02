@@ -155,8 +155,8 @@ champions = {
 Handlebars.registerHelper 'lol_games', (context) ->
   result = '';
   
-  # Iterate list of games in reverse order most recent
-  for game in this.lolGames.reverse()
+  # Iterate list of games
+  for game in this.lolGames
     gameDate = "<time class=\"timeago\" datetime=\"#{game.created}\">#{game.created}</time>"
     result += "<li>#{game.type} #{champions[game.championId]} #{gameDate}";
  
