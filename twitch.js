@@ -59,6 +59,12 @@ var LoLGamePlayer = new Schema({
   teamId: Number,
 });
 
+var LoLGameStat = new Schema({
+  type: String,
+  value: Number,
+  dataVersion: Number
+});
+
 var LoLGame = new Schema({
   _creator: {type: Schema.Types.ObjectId, ref: 'Stream'},
   id: Number,
@@ -70,7 +76,8 @@ var LoLGame = new Schema({
   championId: Number,
   spell1: Number,
   spell2: Number,
-  created: Date
+  created: Date,
+  statistics: [LoLGameStat]
 });
 
 var LoLStat = new Schema({
@@ -102,6 +109,7 @@ var TeamPlayerModel = db.model('TeamPlayer', TeamPlayer);
 var ChampionModel = db.model('Champion', Champion);
 var LoLActiveGameModel = db.model('LoLActiveGame', LoLActiveGame);
 var LoLGamePlayerModel = db.model('LoLGamePlayer', LoLGamePlayer);
+var LoLGameStatModel = db.model('LoLGameStatModel', LoLGameStat);
 var LoLGameModel = db.model('LoLGame', LoLGame);
 var LoLStatModel = db.model('LolStat', LoLStat);
 var StreamModel = db.model('Stream', Stream);
@@ -358,6 +366,17 @@ app.get('/cron/games/:name', function(req, res) {
           
           lolGamePlayers.push(gamePlayer);
         });
+
+        var lolGameStats = [];
+        gameStat.statistics.forEach(function(stat) {
+          var lolGameStat = new LoLGameStatModel({
+            type: stat.statType,
+            value: stat.value,
+            dataVersion: stat.dataVersion
+          });
+          
+          lolGameStats.push(lolGameStat);
+        });
         
         var lolgame = new LoLGameModel({
           _creator: stream._id,
@@ -370,7 +389,8 @@ app.get('/cron/games/:name', function(req, res) {
           championId: gameStat.championId,
           spell1: gameStat.spell1,
           spell2: gameStat.spell2,
-          created: gameStat.createDate
+          created: gameStat.createDate,
+          statistics: lolGameStats
         });
         
         LoLGameModel.findOne({id: lolgame.id}, function(err, game) {
