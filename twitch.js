@@ -94,7 +94,7 @@ var Stream = new Schema({
   streamId: String,
   accountId: String,
   summonerName: String,
-  state: String,
+  status: String,
   viewers: Number,
   preview: String,
   game: String,
